@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Text Analysis</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light grey background */
+        }
+        .container {
+            background-color: #ffffff; /* White container background */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            margin-top: 20px;
+        }
+        .response-card {
+            background-color: #f0f0f0; /* Light grey card background */
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Soft shadow */
+        }
+        .plots-container {
+            margin-top: 30px;
+        }
+        .history-table {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Emotion and Gibberish Analysis</h1>
+        <form method="POST" action="/analyze">
+            <div class="form-group">
+                <label for="text">Received text:</label>
+                <textarea class="form-control" id="text" name="text" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+        </form>
+
+        {% if highest_emotion or highest_gibberish %}
+        <div class="response-card">
+            <h2>Response</h2>
+            {% if highest_emotion %}
+            <div class="alert alert-info" role="alert">
+                <strong>Emotion:</strong> {{ highest_emotion[0] }} (Score: {{ highest_emotion[1]|round(3) }})
+            </div>
+            {% endif %}
+            {% if highest_gibberish %}
+            <div class="alert alert-info" role="alert">
+                <strong>Gibberish:</strong> {{ highest_gibberish[0] }} (Score: {{ highest_gibberish[1]|round(3) }})
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <h2 class="mt-5">Plots</h2>
+        <div class="plots-container">
+            {% if emotion_plot %}
+            <img src="{{ emotion_plot }}" alt="Emotion Analysis Plot" class="img-fluid">
+            {% endif %}
+            {% if gibberish_plot %}
+            <img src="{{ gibberish_plot }}" alt="Gibberish Analysis Plot" class="img-fluid">
+            {% endif %}
+        </div>
+
+        <h2 class="mt-5">History</h2>
+        <div class="history-table">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Text</th>
+                        <th>Emotion Results</th>
+                        <th>Gibberish Results</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.id }}</td>
+                        <td>{{ result.text }}</td>
+                        <td>
+                            <div class="alert alert-success" role="alert">
+                                <strong>Emotion:</strong> {{ result.max_emotion_label }} (Score: {{ result.max_emotion_score|round(3) }})
+                            </div>
+                        </td>
+                        <td>
+                            <div class="alert alert-warning" role="alert">
+                                <strong>Gibberish:</strong> {{ result.max_gibberish_label }} (Score: {{ result.max_gibberish_score|round(3) }})
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <form id="reset-form" method="POST" action="/reset" style="display: none;"></form>
+    <script>
+        function resetForm() {
+            document.getElementById('reset-form').submit();
+        }
+    </script>
+</body>
+</html>
